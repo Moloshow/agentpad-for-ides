@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- AgentPad for IDEs: a Logi Actions plugin. The Logi Plugin Service (net10.0) loads ClaudeCodePlugin.dll
+       from bin\<Configuration>\bin; a .link file in its Plugins folder points it at this build during development. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Loupedeck.ClaudeCodePlugin</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- Keep in step with "version" in package/metadata/LoupedeckPackage.yaml -->
+    <Version>1.0.0</Version>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <PluginName>ClaudeCodeSessions</PluginName>
+    <LogiService>$(ProgramFiles)\Logi\LogiPluginService\</LogiService>
+    <LogiPlugins>$(LocalAppData)\Logi\LogiPluginService\Plugins\</LogiPlugins>
+
+    <PackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\bin\$(Configuration)\'))</PackageRoot>
+    <OutputPath>$(PackageRoot)bin\</OutputPath>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Provided by the Logi Plugin Service at run time, never shipped -->
+    <Reference Include="PluginApi">
+      <HintPath>$(LogiService)PluginApi.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- settings.json helpers shared with the hook executable -->
+    <Compile Include="..\shared\HookSettings.cs" Link="Shared\HookSettings.cs" />
+  </ItemGroup>
+
+  <!-- The hook Claude Code runs, published self-contained into bin\hook. Hooks waiting in the
+       background may keep an older copy open; the plugin deploys each build to its own folder. -->
+  <Target Name="PublishHook" BeforeTargets="PostBuildEvent">
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\hook\ClaudeKeypadHook.csproj&quot; -c $(Configuration) -o &quot;$(PackageRoot)hook&quot; --nologo -v q" />
+  </Target>
+
+  <!-- Package layout (metadata, icons) around the DLL, then point the service at it and reload the plugin -->
+  <Target Name="LinkPlugin" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <PackageFile Include="package\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PackageFile)" DestinationFolder="$(PackageRoot)%(RecursiveDir)" />
+    <WriteLinesToFile File="$(LogiPlugins)$(PluginName).link" Lines="$(PackageRoot)" Overwrite="true" ContinueOnError="true" />
+    <Exec Command="start loupedeck:plugin/$(PluginName)/reload" ContinueOnError="true" />
+    <Message Importance="High" Text="$(PluginName) linked from $(PackageRoot) and reloaded" />
+  </Target>
+
+  <Target Name="UnlinkPlugin" AfterTargets="CoreClean">
+    <Delete Files="$(LogiPlugins)$(PluginName).link" />
+    <RemoveDir Directories="$(PackageRoot)" />
+  </Target>
+
+</Project>

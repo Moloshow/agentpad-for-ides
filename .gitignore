@@ -1,0 +1,7 @@
+# Build output
+bin/
+obj/
+*.user
+*.lplug4
+.vs/
+dist/

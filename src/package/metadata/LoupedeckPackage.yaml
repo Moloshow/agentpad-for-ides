@@ -1,0 +1,28 @@
+type: plugin4
+name: ClaudeCodeSessions
+displayName: AgentPad for IDEs
+version: 1.0.0
+author: Moloshow
+copyright: Copyright © 2026 Moloshow
+description: |
+  Claude Code in your IDE, on your MX Keypad. Live tiles for every Claude Code session in VS Code, Cursor,
+  Windsurf, Antigravity or the terminal: working, needs you, question, plan ready, done, with progress and
+  time left. Answer permission requests (Allow, Deny, Allow always), send ready-made messages to the AI agent,
+  even while it runs a workflow, see context, tokens, model and effort, and your 5-hour and weekly plan limits.
+  Adds its hooks to ~/.claude/settings.json and a few keybindings to your editors (backups are kept).
+  Unofficial, not affiliated with Anthropic, Logitech or Microsoft. Windows. All data stays on your computer.
+homePageUrl: https://github.com/Moloshow/agentpad-for-ides
+supportPageUrl: https://github.com/Moloshow/agentpad-for-ides/issues
+icon256x256: Icon256x256.png
+backgroundColor: 4280690212
+foregroundColor: 4294967295
+textColor: 4294967295
+supportedDevices:
+    - MxCreativeKeypad
+pluginFileName: ClaudeCodePlugin.dll
+pluginFolderWin: bin
+pluginCapabilities:
+    - HasNoApplication
+minimumLoupedeckVersion: 6.0
+license: MIT
+licenseUrl: https://github.com/Moloshow/agentpad-for-ides/blob/main/LICENSE
